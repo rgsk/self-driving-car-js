@@ -93,7 +93,10 @@ export class Car {
       }
     }
 
-    this.x -= Math.sin(this.angle) * this.speed;
+    // when angle would be 0
+    // vertical effect will be more
+    // therefore for updating y we are using cos of angle
     this.y -= Math.cos(this.angle) * this.speed;
+    this.x -= Math.sin(this.angle) * this.speed;
   }
 }
