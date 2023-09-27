@@ -1,13 +1,14 @@
 import { Car } from "./car";
-import { Coord } from "./road";
-import { lerp } from "./utils";
+import { Line } from "./road";
+import { Intersection, getIntersection, lerp } from "./utils";
 
 export class Sensor {
   car: Car;
   rayCount: number;
   rayLength: number;
   raySpread: number;
-  rays: Coord[][];
+  rays: Line[];
+  readings: (Intersection | null)[];
   constructor({ car }: { car: Car }) {
     this.car = car;
     this.rayCount = 3;
@@ -15,10 +16,36 @@ export class Sensor {
     this.raySpread = Math.PI / 4; // 45 degrees
 
     this.rays = [];
+    this.readings = [];
   }
 
-  update() {
+  update(roadBorders: Line[]) {
     this.#castRays();
+    this.readings = [];
+    for (let ray of this.rays) {
+      this.readings.push(this.#getReading(ray, roadBorders));
+    }
+  }
+  #getReading(ray: Line, roadBorders: Line[]) {
+    // ray casting
+    let touches: Intersection[] = [];
+    for (let i = 0; i < roadBorders.length; i++) {
+      const touch = getIntersection(
+        ray.start,
+        ray.end,
+        roadBorders[i].start,
+        roadBorders[i].end
+      );
+      if (touch) {
+        touches.push(touch);
+      }
+    }
+    if (touches.length === 0) {
+      return null;
+    }
+    const offsets = touches.map((e) => e.offset);
+    const minOffset = Math.min(...offsets);
+    return touches.find((e) => e.offset === minOffset)!;
   }
 
   #castRays() {
@@ -38,17 +65,32 @@ export class Sensor {
         x: this.car.x - Math.sin(rayAngle) * this.rayLength,
         y: this.car.y - Math.cos(rayAngle) * this.rayLength,
       };
-      this.rays.push([start, end]);
+      this.rays.push({ start, end });
     }
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     for (let i = 0; i < this.rayCount; i++) {
+      let end = this.rays[i].end;
+      const reading = this.readings[i];
+      if (reading) {
+        end = {
+          x: reading.x,
+          y: reading.y,
+        };
+      }
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.strokeStyle = "yellow";
-      ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
-      ctx.lineTo(this.rays[i][1].x, this.rays[i][1].y);
+      ctx.moveTo(this.rays[i].start.x, this.rays[i].start.y);
+      ctx.lineTo(end.x, end.y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "black";
+      ctx.moveTo(end.x, end.y);
+      ctx.lineTo(this.rays[i].end.x, this.rays[i].end.y);
       ctx.stroke();
     }
   }

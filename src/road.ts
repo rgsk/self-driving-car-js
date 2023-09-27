@@ -4,6 +4,10 @@ export interface Coord {
   x: number;
   y: number;
 }
+export interface Line {
+  start: Coord;
+  end: Coord;
+}
 export class Road {
   x: number;
   width: number;
@@ -12,7 +16,7 @@ export class Road {
   right: number;
   top: number;
   bottom: number;
-  borders: Coord[][];
+  borders: Line[];
   constructor({
     x,
     width,
@@ -38,8 +42,8 @@ export class Road {
     const bottomLeft = { x: this.left, y: this.bottom };
     const bottomRight = { x: this.right, y: this.bottom };
     this.borders = [
-      [topLeft, bottomLeft],
-      [topRight, bottomRight],
+      { start: topLeft, end: bottomLeft },
+      { start: topRight, end: bottomRight },
     ];
   }
 
@@ -67,8 +71,8 @@ export class Road {
     ctx.setLineDash([]);
     this.borders.forEach((border) => {
       ctx.beginPath();
-      ctx.moveTo(border[0].x, border[0].y);
-      ctx.lineTo(border[1].x, border[1].y);
+      ctx.moveTo(border.start.x, border.start.y);
+      ctx.lineTo(border.end.x, border.end.y);
       ctx.stroke();
     });
   }
