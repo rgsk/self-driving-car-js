@@ -22,11 +22,16 @@ export const animate = ({
     // clear any previous fillings
     clearCanvas();
 
+    ctx.save();
+    ctx.translate(0, -car.y + canvas.height * 0.7);
+
     // then draw the car again
     road.draw(ctx);
 
     // car must be drawn later to show it above the lanes
     car.draw(ctx);
+
+    ctx.restore();
     requestAnimationFrame(repeat);
   };
   repeat();
