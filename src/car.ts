@@ -30,7 +30,7 @@ export class Car {
 
     this.speed = 0;
     this.acceleration = 0.2;
-    this.maxSpeed = 10;
+    this.maxSpeed = 3;
     this.angle = 0;
     this.maxReverseSpeed = -(this.maxSpeed / 2);
     this.friction = 0.05;
@@ -50,6 +50,10 @@ export class Car {
   }
 
   update() {
+    this.#move();
+  }
+
+  #move() {
     // giving effect to acceleration
     if (this.controls.forward) {
       this.speed += this.acceleration;
