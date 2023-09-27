@@ -22,6 +22,7 @@ export const animate = ({
     // clear any previous fillings
     clearCanvas();
 
+    // this ensures that camera moves along with the car
     ctx.save();
     ctx.translate(0, -car.y + canvas.height * 0.7);
 

@@ -1,4 +1,5 @@
 import { Controls } from "./controls";
+import { Sensor } from "./sensor";
 
 export class Car {
   x: number;
@@ -12,6 +13,7 @@ export class Car {
   friction: number;
   maxReverseSpeed: number;
   angle: number;
+  sensor: Sensor;
   constructor({
     x,
     y,
@@ -35,6 +37,7 @@ export class Car {
     this.maxReverseSpeed = -(this.maxSpeed / 2);
     this.friction = 0.05;
 
+    this.sensor = new Sensor({ car: this });
     this.controls = new Controls();
   }
 
@@ -47,10 +50,13 @@ export class Car {
     ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
     ctx.fill();
     ctx.restore();
+
+    this.sensor.draw(ctx);
   }
 
   update() {
     this.#move();
+    this.sensor.update();
   }
 
   #move() {

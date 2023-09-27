@@ -1,5 +1,9 @@
 import { lerp } from "./utils";
 
+export interface Coord {
+  x: number;
+  y: number;
+}
 export class Road {
   x: number;
   width: number;
@@ -8,7 +12,7 @@ export class Road {
   right: number;
   top: number;
   bottom: number;
-  borders: { x: number; y: number }[][];
+  borders: Coord[][];
   constructor({
     x,
     width,
