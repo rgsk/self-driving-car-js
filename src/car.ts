@@ -1,7 +1,10 @@
 import { Controls } from "./controls";
 import { Coord, Line } from "./road";
 import { Sensor } from "./sensor";
-import { checkIfPolygonIntersectsWithLine } from "./utils";
+import {
+  checkIfPolygonIntersectsWithLine,
+  checkPolygonsIntersection,
+} from "./utils";
 
 export class Car {
   x: number;
@@ -15,19 +18,22 @@ export class Car {
   friction: number;
   maxReverseSpeed: number;
   angle: number;
-  sensor: Sensor;
+  sensor: Sensor | undefined;
   polygon: Coord[] | undefined;
   damaged: boolean;
+  isPlayer: boolean;
   constructor({
     x,
     y,
     width,
     height,
+    isPlayer = false,
   }: {
     x: number;
     y: number;
     width: number;
     height: number;
+    isPlayer?: boolean;
   }) {
     this.x = x;
     this.y = y;
@@ -36,14 +42,17 @@ export class Car {
 
     this.speed = 0;
     this.acceleration = 0.2;
-    this.maxSpeed = 3;
+    this.maxSpeed = isPlayer ? 3 : 2;
     this.angle = 0;
     this.damaged = false;
     this.maxReverseSpeed = -(this.maxSpeed / 2);
     this.friction = 0.05;
+    if (isPlayer) {
+      this.sensor = new Sensor({ car: this });
+    }
+    this.isPlayer = isPlayer;
 
-    this.sensor = new Sensor({ car: this });
-    this.controls = new Controls();
+    this.controls = new Controls(isPlayer);
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -59,7 +68,11 @@ export class Car {
     if (this.damaged) {
       ctx.fillStyle = "gray";
     } else {
-      ctx.fillStyle = "black";
+      if (this.isPlayer) {
+        ctx.fillStyle = "blue";
+      } else {
+        ctx.fillStyle = "red";
+      }
     }
 
     ctx.beginPath();
@@ -71,24 +84,38 @@ export class Car {
       ctx.fill();
     }
 
-    this.sensor.draw(ctx);
+    this.sensor?.draw(ctx);
   }
 
-  update(roadBorders: Line[]) {
+  update({ roadBorders, traffic }: { roadBorders: Line[]; traffic: Car[] }) {
     if (!this.damaged) {
       this.#move();
       this.polygon = this.#createPolygon();
-      this.damaged = this.#assessDamage(roadBorders);
+      this.damaged = this.#assessDamage({ roadBorders, traffic });
     }
 
-    this.sensor.update(roadBorders);
+    this.sensor?.update({ roadBorders, traffic });
   }
 
-  #assessDamage(roadBorders: Line[]) {
+  #assessDamage({
+    roadBorders,
+    traffic,
+  }: {
+    roadBorders: Line[];
+    traffic: Car[];
+  }) {
     if (this.polygon) {
       for (let i = 0; i < roadBorders.length; i++) {
         if (checkIfPolygonIntersectsWithLine(this.polygon, roadBorders[i])) {
           return true;
+        }
+      }
+      for (let i = 0; i < traffic.length; i++) {
+        const trafficCarPolygon = traffic[i].polygon;
+        if (trafficCarPolygon) {
+          if (checkPolygonsIntersection(this.polygon, trafficCarPolygon)) {
+            return true;
+          }
         }
       }
     }

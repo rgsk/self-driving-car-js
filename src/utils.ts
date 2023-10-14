@@ -45,3 +45,23 @@ export function checkIfPolygonIntersectsWithLine(polygon: Coord[], line: Line) {
   }
   return false;
 }
+export function checkPolygonsIntersection(
+  polygon1: Coord[],
+  polygon2: Coord[]
+) {
+  for (let i = 0; i < polygon1.length; i++) {
+    for (let j = 0; j < polygon2.length; j++) {
+      const touch = getIntersection(
+        polygon1[i],
+        polygon1[(i + 1) % polygon1.length],
+        // last point in polygon is connected to the first point in polygon
+        polygon2[j],
+        polygon2[(j + 1) % polygon2.length]
+      );
+      if (touch) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

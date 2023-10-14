@@ -3,6 +3,9 @@ import { Car } from "./car";
 import { Road } from "./road";
 import "./style.css";
 
+const CAR_WIDTH = 30;
+const CAR_HEIGHT = 50;
+
 const canvas = document.getElementById("myCanvas") as HTMLCanvasElement | null;
 if (canvas) {
   const resizeCanvas = () => {
@@ -20,12 +23,22 @@ if (canvas) {
       width: canvas.width * 0.9,
       laneCount,
     });
+
     const car = new Car({
       x: road.getLaneCenter(Math.floor(laneCount / 2)),
       y: 100,
-      width: 30,
-      height: 50,
+      width: CAR_WIDTH,
+      height: CAR_HEIGHT,
+      isPlayer: true,
     });
-    animate({ car, ctx, canvas, road });
+    const traffic = [
+      new Car({
+        x: road.getLaneCenter(Math.floor(laneCount / 2)),
+        y: -100,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+    ];
+    animate({ car, traffic, ctx, canvas, road });
   }
 }

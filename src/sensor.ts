@@ -19,14 +19,22 @@ export class Sensor {
     this.readings = [];
   }
 
-  update(roadBorders: Line[]) {
+  update({ roadBorders, traffic }: { roadBorders: Line[]; traffic: Car[] }) {
     this.#castRays();
     this.readings = [];
     for (let ray of this.rays) {
-      this.readings.push(this.#getReading(ray, roadBorders));
+      this.readings.push(this.#getReading({ ray, roadBorders, traffic }));
     }
   }
-  #getReading(ray: Line, roadBorders: Line[]) {
+  #getReading({
+    ray,
+    roadBorders,
+    traffic,
+  }: {
+    ray: Line;
+    roadBorders: Line[];
+    traffic: Car[];
+  }) {
     // ray casting
     let touches: Intersection[] = [];
     for (let i = 0; i < roadBorders.length; i++) {
@@ -38,6 +46,22 @@ export class Sensor {
       );
       if (touch) {
         touches.push(touch);
+      }
+    }
+    for (let i = 0; i < traffic.length; i++) {
+      const poly = traffic[i].polygon;
+      if (poly) {
+        for (let j = 0; j < poly.length; j++) {
+          const touch = getIntersection(
+            ray.start,
+            ray.end,
+            poly[j],
+            poly[(j + 1) % poly.length]
+          );
+          if (touch) {
+            touches.push(touch);
+          }
+        }
       }
     }
     if (touches.length === 0) {
