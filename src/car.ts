@@ -1,4 +1,5 @@
 import { Controls } from "./controls";
+import { NeuralNetwork } from "./network";
 import { Coord, Line } from "./road";
 import { Sensor } from "./sensor";
 import {
@@ -22,6 +23,7 @@ export class Car {
   polygon: Coord[] | undefined;
   damaged: boolean;
   isPlayer: boolean;
+  brain: NeuralNetwork | undefined;
   constructor({
     x,
     y,
@@ -49,6 +51,7 @@ export class Car {
     this.friction = 0.05;
     if (isPlayer) {
       this.sensor = new Sensor({ car: this });
+      this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     }
     this.isPlayer = isPlayer;
 
@@ -94,7 +97,19 @@ export class Car {
       this.damaged = this.#assessDamage({ roadBorders, traffic });
     }
 
-    this.sensor?.update({ roadBorders, traffic });
+    if (this.sensor) {
+      this.sensor.update({ roadBorders, traffic });
+      if (this.brain) {
+        const offsets = this.sensor.readings.map((s) =>
+          s === null ? 0 : 1 - s.offset
+        );
+        const outputs = NeuralNetwork.feedForward(offsets, this.brain);
+        this.controls.forward = !!outputs[0];
+        this.controls.left = !!outputs[1];
+        this.controls.right = !!outputs[2];
+        this.controls.reverse = !!outputs[3];
+      }
+    }
   }
 
   #assessDamage({
