@@ -24,18 +24,21 @@ export class Car {
   damaged: boolean;
   isPlayer: boolean;
   brain: NeuralNetwork | undefined;
+  isAIControlled?: boolean;
   constructor({
     x,
     y,
     width,
     height,
     isPlayer = false,
+    isAIControlled,
   }: {
     x: number;
     y: number;
     width: number;
     height: number;
     isPlayer?: boolean;
+    isAIControlled?: boolean;
   }) {
     this.x = x;
     this.y = y;
@@ -54,7 +57,7 @@ export class Car {
       this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     }
     this.isPlayer = isPlayer;
-
+    this.isAIControlled = isAIControlled;
     this.controls = new Controls(isPlayer);
   }
 
@@ -104,10 +107,12 @@ export class Car {
           s === null ? 0 : 1 - s.offset
         );
         const outputs = NeuralNetwork.feedForward(offsets, this.brain);
-        this.controls.forward = !!outputs[0];
-        this.controls.left = !!outputs[1];
-        this.controls.right = !!outputs[2];
-        this.controls.reverse = !!outputs[3];
+        if (this.isAIControlled) {
+          this.controls.forward = !!outputs[0];
+          this.controls.left = !!outputs[1];
+          this.controls.right = !!outputs[2];
+          this.controls.reverse = !!outputs[3];
+        }
       }
     }
   }

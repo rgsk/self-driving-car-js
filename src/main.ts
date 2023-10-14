@@ -39,6 +39,7 @@ if (carCanvas && networkCanvas) {
       width: CAR_WIDTH,
       height: CAR_HEIGHT,
       isPlayer: true,
+      isAIControlled: false,
     });
     const traffic = [
       new Car({
