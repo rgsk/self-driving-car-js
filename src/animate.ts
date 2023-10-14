@@ -1,22 +1,25 @@
 import { Car } from "./car";
 import { Road } from "./road";
+import { Visualizer } from "./visualizer";
 
 export const animate = ({
   car,
-  ctx,
+  carCtx,
+  networkCtx,
   canvas,
   road,
   traffic,
 }: {
   car: Car;
-  ctx: CanvasRenderingContext2D;
+  carCtx: CanvasRenderingContext2D;
+  networkCtx: CanvasRenderingContext2D;
   canvas: HTMLCanvasElement;
   road: Road;
   traffic: Car[];
 }) => {
   // Function to clear the canvas
   function clearCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    carCtx.clearRect(0, 0, canvas.width, canvas.height);
   }
   const repeat = () => {
     for (let i = 0; i < traffic.length; i++) {
@@ -27,19 +30,22 @@ export const animate = ({
     clearCanvas();
 
     // this ensures that camera moves along with the car
-    ctx.save();
-    ctx.translate(0, -car.y + canvas.height * 0.7);
+    carCtx.save();
+    carCtx.translate(0, -car.y + canvas.height * 0.7);
 
     // then draw the car again
-    road.draw(ctx);
+    road.draw(carCtx);
 
     // car must be drawn later to show it above the lanes
     for (let i = 0; i < traffic.length; i++) {
-      traffic[i].draw(ctx);
+      traffic[i].draw(carCtx);
     }
-    car.draw(ctx);
+    car.draw(carCtx);
 
-    ctx.restore();
+    carCtx.restore();
+    if (car.brain) {
+      Visualizer.drawNetwork(networkCtx, car.brain);
+    }
     requestAnimationFrame(repeat);
   };
   repeat();

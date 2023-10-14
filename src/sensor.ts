@@ -11,9 +11,9 @@ export class Sensor {
   readings: (Intersection | null)[];
   constructor({ car }: { car: Car }) {
     this.car = car;
-    this.rayCount = 3;
-    this.rayLength = 100;
-    this.raySpread = Math.PI / 4; // 45 degrees
+    this.rayCount = 5;
+    this.rayLength = 150;
+    this.raySpread = Math.PI / 2; // 45 degrees
 
     this.rays = [];
     this.readings = [];
@@ -77,8 +77,8 @@ export class Sensor {
     for (let i = 0; i < this.rayCount; i++) {
       const rayAngle =
         lerp(
-          -this.raySpread / 2,
           this.raySpread / 2,
+          -this.raySpread / 2,
           this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1)
         ) + this.car.angle;
       const start = {
