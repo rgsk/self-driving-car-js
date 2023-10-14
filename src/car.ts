@@ -61,7 +61,7 @@ export class Car {
     this.controls = new Controls(isPlayer);
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, drawSensor = false) {
     // ctx.save();
     // ctx.translate(this.x, this.y);
     // ctx.rotate(-this.angle);
@@ -89,8 +89,9 @@ export class Car {
       }
       ctx.fill();
     }
-
-    this.sensor?.draw(ctx);
+    if (this.sensor && drawSensor) {
+      this.sensor.draw(ctx);
+    }
   }
 
   update({ roadBorders, traffic }: { roadBorders: Line[]; traffic: Car[] }) {

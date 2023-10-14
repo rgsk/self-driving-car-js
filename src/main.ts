@@ -33,14 +33,33 @@ if (carCanvas && networkCanvas) {
       laneCount,
     });
 
-    const car = new Car({
-      x: road.getLaneCenter(Math.floor(laneCount / 2)),
-      y: 100,
-      width: CAR_WIDTH,
-      height: CAR_HEIGHT,
-      isPlayer: true,
-      isAIControlled: false,
-    });
+    function generateCars(N: number) {
+      const cars = [];
+      for (let i = 0; i < N; i++) {
+        cars.push(
+          new Car({
+            x: road.getLaneCenter(Math.floor(laneCount / 2)),
+            y: 100,
+            width: CAR_WIDTH,
+            height: CAR_HEIGHT,
+            isAIControlled: true,
+            isPlayer: true,
+          })
+        );
+      }
+      return cars;
+    }
+
+    // const car = new Car({
+    //   x: road.getLaneCenter(Math.floor(laneCount / 2)),
+    //   y: 100,
+    //   width: CAR_WIDTH,
+    //   height: CAR_HEIGHT,
+    //   isPlayer: true,
+    //   isAIControlled: false,
+    // });
+    const N = 100;
+    const cars = generateCars(N);
     const traffic = [
       new Car({
         x: road.getLaneCenter(Math.floor(laneCount / 2)),
@@ -51,7 +70,7 @@ if (carCanvas && networkCanvas) {
     ];
 
     animate({
-      car,
+      cars,
       traffic,
       carCtx: carCtx,
       canvas: carCanvas,

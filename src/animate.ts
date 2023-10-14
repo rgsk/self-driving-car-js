@@ -3,14 +3,14 @@ import { Road } from "./road";
 import { Visualizer } from "./visualizer";
 
 export const animate = ({
-  car,
+  cars,
   carCtx,
   networkCtx,
   canvas,
   road,
   traffic,
 }: {
-  car: Car;
+  cars: Car[];
   carCtx: CanvasRenderingContext2D;
   networkCtx: CanvasRenderingContext2D;
   canvas: HTMLCanvasElement;
@@ -25,13 +25,20 @@ export const animate = ({
     for (let i = 0; i < traffic.length; i++) {
       traffic[i].update({ roadBorders: road.borders, traffic: [] });
     }
-    car.update({ roadBorders: road.borders, traffic: traffic });
+    for (let car of cars) {
+      car.update({ roadBorders: road.borders, traffic: traffic });
+    }
+
+    const bestCar = cars.find(
+      (c) => c.y === Math.min(...cars.map((c) => c.y))
+    )!;
+
     // clear any previous fillings
     clearCanvas();
 
     // this ensures that camera moves along with the car
     carCtx.save();
-    carCtx.translate(0, -car.y + canvas.height * 0.7);
+    carCtx.translate(0, -bestCar.y + canvas.height * 0.7);
 
     // then draw the car again
     road.draw(carCtx);
@@ -40,11 +47,16 @@ export const animate = ({
     for (let i = 0; i < traffic.length; i++) {
       traffic[i].draw(carCtx);
     }
-    car.draw(carCtx);
+    carCtx.globalAlpha = 0.2;
+    for (let car of cars) {
+      car.draw(carCtx);
+    }
+    carCtx.globalAlpha = 1;
+    bestCar.draw(carCtx, true);
 
     carCtx.restore();
-    if (car.brain) {
-      Visualizer.drawNetwork(networkCtx, car.brain);
+    if (bestCar.brain) {
+      Visualizer.drawNetwork(networkCtx, bestCar.brain);
     }
     requestAnimationFrame(repeat);
   };
