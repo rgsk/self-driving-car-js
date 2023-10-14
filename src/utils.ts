@@ -1,4 +1,4 @@
-import { Coord } from "./road";
+import { Coord, Line } from "./road";
 
 export const lerp = (A: number, B: number, t: number) => {
   return A + (B - A) * t;
@@ -28,4 +28,20 @@ export function getIntersection(A: Coord, B: Coord, C: Coord, D: Coord) {
   }
 
   return null;
+}
+
+export function checkIfPolygonIntersectsWithLine(polygon: Coord[], line: Line) {
+  for (let i = 0; i < polygon.length; i++) {
+    const touch = getIntersection(
+      polygon[i],
+      polygon[(i + 1) % polygon.length],
+      // last point in polygon is connected to the first point in polygon
+      line.start,
+      line.end
+    );
+    if (touch) {
+      return true;
+    }
+  }
+  return false;
 }

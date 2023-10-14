@@ -1,6 +1,7 @@
 import { Controls } from "./controls";
-import { Line } from "./road";
+import { Coord, Line } from "./road";
 import { Sensor } from "./sensor";
+import { checkIfPolygonIntersectsWithLine } from "./utils";
 
 export class Car {
   x: number;
@@ -15,7 +16,8 @@ export class Car {
   maxReverseSpeed: number;
   angle: number;
   sensor: Sensor;
-  polygon: { x: number; y: number }[] | undefined;
+  polygon: Coord[] | undefined;
+  damaged: boolean;
   constructor({
     x,
     y,
@@ -36,6 +38,7 @@ export class Car {
     this.acceleration = 0.2;
     this.maxSpeed = 3;
     this.angle = 0;
+    this.damaged = false;
     this.maxReverseSpeed = -(this.maxSpeed / 2);
     this.friction = 0.05;
 
@@ -53,6 +56,12 @@ export class Car {
     // ctx.fill();
     // ctx.restore();
 
+    if (this.damaged) {
+      ctx.fillStyle = "gray";
+    } else {
+      ctx.fillStyle = "black";
+    }
+
     ctx.beginPath();
     if (this.polygon) {
       ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
@@ -66,9 +75,24 @@ export class Car {
   }
 
   update(roadBorders: Line[]) {
-    this.#move();
-    this.polygon = this.#createPolygon();
+    if (!this.damaged) {
+      this.#move();
+      this.polygon = this.#createPolygon();
+      this.damaged = this.#assessDamage(roadBorders);
+    }
+
     this.sensor.update(roadBorders);
+  }
+
+  #assessDamage(roadBorders: Line[]) {
+    if (this.polygon) {
+      for (let i = 0; i < roadBorders.length; i++) {
+        if (checkIfPolygonIntersectsWithLine(this.polygon, roadBorders[i])) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   #createPolygon() {
