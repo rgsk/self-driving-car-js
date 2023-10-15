@@ -44,4 +44,4 @@ you can restart the process, by deleting the saved weights using "Discard" butto
 
 ## Preview
 
-![preview](ss1.png)
+![preview](/ss1.png)
