@@ -1,4 +1,5 @@
 import { Car } from "./car";
+import { localStorageKeys } from "./localStorageKeys";
 import { Road } from "./road";
 import { Visualizer } from "./visualizer";
 
@@ -21,6 +22,32 @@ export const animate = ({
   function clearCanvas() {
     carCtx.clearRect(0, 0, canvas.width, canvas.height);
   }
+
+  let bestCar = cars[0];
+  const savedBrain = localStorage.getItem(localStorageKeys.bestBrain);
+  if (savedBrain) {
+    bestCar.brain = JSON.parse(savedBrain);
+  }
+
+  function save() {
+    localStorage.setItem(
+      localStorageKeys.bestBrain,
+      JSON.stringify(bestCar.brain)
+    );
+  }
+  const saveButton = document.getElementById("save");
+  if (saveButton) {
+    saveButton.addEventListener("click", save);
+  }
+
+  function discard() {
+    localStorage.removeItem(localStorageKeys.bestBrain);
+  }
+  const discardButton = document.getElementById("discard");
+  if (discardButton) {
+    discardButton.addEventListener("click", discard);
+  }
+
   const repeat = () => {
     for (let i = 0; i < traffic.length; i++) {
       traffic[i].update({ roadBorders: road.borders, traffic: [] });
@@ -29,9 +56,7 @@ export const animate = ({
       car.update({ roadBorders: road.borders, traffic: traffic });
     }
 
-    const bestCar = cars.find(
-      (c) => c.y === Math.min(...cars.map((c) => c.y))
-    )!;
+    bestCar = cars.find((c) => c.y === Math.min(...cars.map((c) => c.y)))!;
 
     // clear any previous fillings
     clearCanvas();
@@ -58,6 +83,7 @@ export const animate = ({
     if (bestCar.brain) {
       Visualizer.drawNetwork(networkCtx, bestCar.brain);
     }
+
     requestAnimationFrame(repeat);
   };
   repeat();

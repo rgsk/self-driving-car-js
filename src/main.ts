@@ -58,7 +58,7 @@ if (carCanvas && networkCanvas) {
     //   isPlayer: true,
     //   isAIControlled: false,
     // });
-    const N = 100;
+    const N = 1000;
     const cars = generateCars(N);
     const traffic = [
       new Car({
