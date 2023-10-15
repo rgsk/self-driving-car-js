@@ -79,6 +79,30 @@ if (carCanvas && networkCanvas) {
         width: CAR_WIDTH,
         height: CAR_HEIGHT,
       }),
+      new Car({
+        x: road.getLaneCenter(0),
+        y: -500,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+      new Car({
+        x: road.getLaneCenter(1),
+        y: -500,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+      new Car({
+        x: road.getLaneCenter(1),
+        y: -700,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+      new Car({
+        x: road.getLaneCenter(2),
+        y: -700,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
     ];
 
     animate({
