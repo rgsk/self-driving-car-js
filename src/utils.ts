@@ -73,3 +73,10 @@ export function getRGBA(value: number) {
   const B = value > 0 ? 0 : 255;
   return `rgba(${R},${G},${B},${alpha})`;
 }
+
+export function getRandomColor() {
+  // this way we will get the values ranging from 290deg to 550deg
+  // all colors except blue
+  const hue = 290 + Math.random() * 260;
+  return `hsl(${hue},100%,60%)`;
+}

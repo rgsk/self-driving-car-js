@@ -1,3 +1,4 @@
+import carSrc from "./car.png";
 import { Controls } from "./controls";
 import { NeuralNetwork } from "./network";
 import { Coord, Line } from "./road";
@@ -5,6 +6,7 @@ import { Sensor } from "./sensor";
 import {
   checkIfPolygonIntersectsWithLine,
   checkPolygonsIntersection,
+  getRandomColor,
 } from "./utils";
 
 export class Car {
@@ -25,6 +27,8 @@ export class Car {
   isPlayer: boolean;
   brain: NeuralNetwork | undefined;
   isAIControlled?: boolean;
+  img: HTMLImageElement;
+  mask: HTMLCanvasElement;
   constructor({
     x,
     y,
@@ -59,10 +63,39 @@ export class Car {
     this.isPlayer = isPlayer;
     this.isAIControlled = isAIControlled;
     this.controls = new Controls(isPlayer);
+    this.img = new Image();
+    this.img.src = carSrc;
+
+    this.mask = document.createElement("canvas");
+    this.mask.width = width;
+    this.mask.height = height;
+
+    const maskCtx = this.mask.getContext("2d");
+    if (maskCtx) {
+      this.img.onload = () => {
+        if (this.isPlayer) {
+          maskCtx.fillStyle = "blue";
+        } else {
+          // maskCtx.fillStyle = "red";
+          maskCtx.fillStyle = getRandomColor();
+        }
+        maskCtx.rect(0, 0, this.width, this.height);
+        maskCtx.fill();
+        maskCtx.globalCompositeOperation = "destination-atop";
+        maskCtx.drawImage(this.img, 0, 0, this.width, this.height);
+      };
+    }
   }
 
   draw(ctx: CanvasRenderingContext2D, drawSensor = false) {
-    // ctx.save();
+    if (this.sensor && drawSensor) {
+      this.sensor.draw(ctx);
+    }
+
+    ctx.save();
+
+    // 1. draw rectangle
+
     // ctx.translate(this.x, this.y);
     // ctx.rotate(-this.angle);
 
@@ -71,27 +104,50 @@ export class Car {
     // ctx.fill();
     // ctx.restore();
 
-    if (this.damaged) {
-      ctx.fillStyle = "gray";
-    } else {
-      if (this.isPlayer) {
-        ctx.fillStyle = "blue";
-      } else {
-        ctx.fillStyle = "red";
-      }
+    // 2. draw the polygon sides and fill it
+
+    // if (this.damaged) {
+    //   ctx.fillStyle = "gray";
+    // } else {
+    //   if (this.isPlayer) {
+    //     ctx.fillStyle = "blue";
+    //   } else {
+    //     ctx.fillStyle = "red";
+    //   }
+    // }
+
+    // ctx.beginPath();
+    // if (this.polygon) {
+    //   ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+    //   for (let i = 1; i < this.polygon.length; i++) {
+    //     ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+    //   }
+    //   ctx.fill();
+    // }
+
+    // 3. use image
+    ctx.translate(this.x, this.y);
+    ctx.rotate(-this.angle);
+
+    if (!this.damaged) {
+      ctx.drawImage(
+        this.mask,
+        -this.width / 2,
+        -this.height / 2,
+        this.width,
+        this.height
+      );
+      ctx.globalCompositeOperation = "multiply";
     }
 
-    ctx.beginPath();
-    if (this.polygon) {
-      ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-      for (let i = 1; i < this.polygon.length; i++) {
-        ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-      }
-      ctx.fill();
-    }
-    if (this.sensor && drawSensor) {
-      this.sensor.draw(ctx);
-    }
+    ctx.drawImage(
+      this.img,
+      -this.width / 2,
+      -this.height / 2,
+      this.width,
+      this.height
+    );
+    ctx.restore();
   }
 
   update({ roadBorders, traffic }: { roadBorders: Line[]; traffic: Car[] }) {
