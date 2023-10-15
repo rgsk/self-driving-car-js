@@ -58,12 +58,24 @@ if (carCanvas && networkCanvas) {
     //   isPlayer: true,
     //   isAIControlled: false,
     // });
-    const N = 1000;
+    const N = 100;
     const cars = generateCars(N);
     const traffic = [
       new Car({
         x: road.getLaneCenter(Math.floor(laneCount / 2)),
         y: -100,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+      new Car({
+        x: road.getLaneCenter(0),
+        y: -300,
+        width: CAR_WIDTH,
+        height: CAR_HEIGHT,
+      }),
+      new Car({
+        x: road.getLaneCenter(2),
+        y: -300,
         width: CAR_WIDTH,
         height: CAR_HEIGHT,
       }),

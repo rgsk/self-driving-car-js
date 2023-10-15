@@ -1,5 +1,6 @@
 import { Car } from "./car";
 import { localStorageKeys } from "./localStorageKeys";
+import { NeuralNetwork } from "./network";
 import { Road } from "./road";
 import { Visualizer } from "./visualizer";
 
@@ -26,7 +27,15 @@ export const animate = ({
   let bestCar = cars[0];
   const savedBrain = localStorage.getItem(localStorageKeys.bestBrain);
   if (savedBrain) {
-    bestCar.brain = JSON.parse(savedBrain);
+    for (let i = 0; i < cars.length; i++) {
+      cars[i].brain = JSON.parse(savedBrain);
+      if (i !== 0) {
+        const brain = cars[i].brain;
+        if (brain) {
+          NeuralNetwork.mutate(brain, 0.2);
+        }
+      }
+    }
   }
 
   function save() {
